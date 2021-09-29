@@ -1,0 +1,4 @@
+credentials/
+terraform/.terraform/
+terraform/*terraform*
+terraform/*.out
