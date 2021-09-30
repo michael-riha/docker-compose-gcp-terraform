@@ -1,6 +1,11 @@
 variable "project" {
 }
 
+// f1-micro good enough to start, but with docker & k8s, not good enough!
+variable "maschine_type" {
+  default = "f1-micro"
+}
+
 variable "credentials_file" {
 }
 
