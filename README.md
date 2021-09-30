@@ -3,10 +3,8 @@ I do not want to download & install `Terraform` locally,
 <br>
 [I decided to use it from a docker container.](https://www.mrjamiebowman.com/software-development/docker/running-terraform-in-docker-locally/)
 
-<div style="background-color:#aa1111; padding: 0.3em">
-WARNING,<br>this is a Terraform newbie project.<br>
-I start from scratch, and improve over time! 
-</div>
+## WARNING,<br>this is a Terraform newbie project.<br>
+_I start from scratch, and improve over time!_
 
 --------
 # Basic `terraform` GCP setup for <br> `docker`/ `docker-compose` <br> in a VM
@@ -17,15 +15,16 @@ I start from scratch, and improve over time!
     - [add some maschine](#add-some-maschine) to the mix
     - [destroy all that again](#destroy-all-that-again)
 3. [Install `docker` from `terraform`](#from-terraform)
-<br>
-<br>
 4. [Summary](#summary)
 
 ---
 ## [So let's get started](https://learn.hashicorp.com/tutorials/terraform/google-cloud-platform-build?in=terraform/gcp-get-started)
 
 ```
-Warning: While everything provisioned in this tutorial should fall within GCP's free tier, if you provision resources outside of the free tier, you may be charged. We are not responsible for any charges you may incur.
+Warning: While everything provisioned in this tutorial
+should fall within GCP's free tier, if you provision
+resources outside of the free tier, you may be charged. We
+are not responsible for any charges you may incur.
 ```
 _from the official documentation linked above_
 
@@ -37,11 +36,14 @@ I did everything [on that page](https://learn.hashicorp.com/tutorials/terraform/
 - create & download service account (to the `/credentials`-folder)
 <br>
 ---
+
 ## Run `terraform init`
-on a local `terraform:light`-container
+on a local `terraform:light` -container
+
 ```bash
 docker run -it --entrypoint "sh" -v ${PWD}:/workspace -w /workspace hashicorp/terraform:light
 ```
+
 in the `sh` I run
 
 `terraform init`
@@ -80,15 +82,17 @@ DONE
 
 -  let's [add our SSH keys](https://stackoverflow.com/a/38647811)
 
-```json
+```
 metadata = {
-    ssh-keys = "${var.gce_ssh_user}:${file(var.gce_ssh_pub_key_file)}"
+  ssh-keys = "${var.gce_ssh_user}:${file(var.gce_ssh_pub_key_file)}"
   }
 ```
 
 [to make this happen, we should create a `variables.tf`](https://learn.hashicorp.com/tutorials/terraform/google-cloud-platform-variables?in=terraform/gcp-get-started)
 ```
-Terraform automatically loads files called terraform.tfvars or matching *.auto.tfvars in the working directory when running operations.
+Terraform automatically loads files called terraform.tfvars
+or matching *.auto.tfvars in the working directory when
+running operations.
 ```
 https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance#metadata
 
@@ -145,6 +149,7 @@ resource "google_compute_firewall" "ssh-rule" {
     - `gcloud compute images list`
     
     I needed to change `debian9` from the official documentation to `debian11`
+
 ---
 
 ## Summary
