@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+   name: selfsigned-issuer
+spec:
+   selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+   name: first-tls
+spec:
+   secretName: first-tls
+   dnsNames:
+   - "*.cluster.remote"
+   issuerRef:
+     name: selfsigned-issuer

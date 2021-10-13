@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: k8s.bst.com
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+spec:
+  tls:
+    - secretName: k8s.beyondthestatic.com
+      hosts:
+        - k8s.beyondthestatic.com
+  rules:
+  - host: k8s.beyondthestatic.com
+    http:
+      paths: 
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: terraform-nginx
+            port:
+              number: 80

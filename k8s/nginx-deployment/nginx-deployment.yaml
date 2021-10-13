@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: terraform-nginx
+  name: terraform-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: terraform-nginx
+  template:
+    metadata:
+      labels:
+        run: terraform-nginx
+        app: terraform-nginx
+    spec:
+      containers:
+      - image: nginx
+        name: terraform-nginx
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: nginx-volume
+      volumes:
+      - name: nginx-volume
+        configMap:
+          name: nginx-index-html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: terraform-nginx
+  name: terraform-nginx
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: terraform-nginx
+---
+apiVersion: v1
+data:
+  index.html: |-
+    <!doctype html>
+    <html>
+      <head>
+        <title>Welcome to your secure web page using Nginx</title>
+      </head>
+      <body>
+        <p>This will be a secure web page at the end of the tutorial!</p>
+      </body>
+    </html>
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: nginx-index-html
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: terraform-nginx
+            port:
+              number: 80

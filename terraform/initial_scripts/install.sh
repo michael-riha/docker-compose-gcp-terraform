@@ -1,3 +1,5 @@
 #!/bin/bash
-curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash &&
-k3d cluster create dev --api-port 0.0.0.0:6550
+echo "-- install docker ---"
+sudo curl -sSL https://get.docker.com/ | sh &&
+sudo usermod -aG docker `echo $USER` &&
+echo "-- docker installed and group added --"

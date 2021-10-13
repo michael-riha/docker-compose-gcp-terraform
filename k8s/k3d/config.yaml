@@ -1,0 +1,24 @@
+# k3d configuration file -> https://k3d.io/usage/configfile/
+# recreating `k3d --verbose cluster create dev --api-port 0.0.0.0:6550 -p 80:80@loadbalancer -p 443:443@loadbalancer`
+apiVersion: k3d.io/v1alpha2 # this will change in the future as we make everything more stable
+kind: Simple # internally, we also have a Cluster config, which is not yet available externally
+name: dev # name that you want to give to your cluster (will still be prefixed with `k3d-`)
+kubeAPI: # same as `--api-port myhost.my.domain:6445` (where the name would resolve to 127.0.0.1)
+  #host: "myhost.my.domain" # important for the `server` setting in the kubeconfig
+  hostIP: "0.0.0.0" # where the Kubernetes API will be listening on
+  hostPort: "6550" # where the Kubernetes API listening port will be mapped to on your host system
+ports:
+  - port: 80:80 # same as `--port '80:80@loadbalancer'`
+    nodeFilters:
+      - loadbalancer
+  - port: 443:443 # same as `--port '443:443@loadbalancer'`
+    nodeFilters:
+      - loadbalancer
+options:
+  k3s: # options passed on to K3s itself
+    #extraServerArgs: # additional arguments passed to the `k3s server` command; same as `--k3s-server-arg`
+    #  - --tls-san=my.host.domain
+    # taken from -> https://k3d.io/faq/faq/
+    extraAgentArgs: # addditional arguments passed to the `k3s agent` command; same as `--k3s-agent-arg`
+      - "--kubelet-arg=eviction-hard=imagefs.available<1%,nodefs.available<1%"
+      - "--kubelet-arg=eviction-minimum-reclaim=imagefs.available=1%,nodefs.available=1%"

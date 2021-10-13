@@ -26,7 +26,7 @@ data "google_compute_image" "gcp_image" {
 
 resource "google_compute_instance" "vm_instance" {
   name         = "terraform-instance"
-  machine_type = var.maschine_type
+  machine_type = var.gcp_maschine_type
   tags         = ["terraform-instance"]
   boot_disk {
     initialize_params {
@@ -45,17 +45,29 @@ resource "google_compute_instance" "vm_instance" {
     agent       = false
   }
 
-  # Copies the myapp.conf file to /etc/myapp.conf -> https://www.terraform.io/docs/language/resources/provisioners/file.html#example-usage
+  # Copies the `install.sh`-script file to the remote maschine `/tmp/k8s_install.sh` -> https://www.terraform.io/docs/language/resources/provisioners/file.html#example-usage
+  provisioner "file" {
+    source      = "../k8s/initial_scripts/install.sh"
+    destination = "/tmp/k8s_install.sh"
+  }
+
+  #this is maschine related basic installation of `docker`
   provisioner "file" {
     source      = "initial_scripts/install.sh"
-    destination = "/tmp/install.sh"
+    destination = "/tmp/maschine_install.sh"
+  }
+
+  # Copies the k3d `config`file to the remote maschine `/tmp/k3config`
+  provisioner "file" {
+    source      = "../k8s/k3d/config.yaml"
+    destination = "/tmp/k3d-config.yaml"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "sudo curl -sSL https://get.docker.com/ | sh",
-      "sudo usermod -aG docker `echo $USER`",
-      "sudo docker run -d -p 80:80 nginx"
+      "echo 'now we start installing on the remote maschine'",
+      "chmod +x /tmp/maschine_install.sh && /tmp/maschine_install.sh &&",
+      "chmod +x /tmp/k8s_install.sh && /tmp/k8s_install.sh"
     ]
   }
 
@@ -85,7 +97,7 @@ resource "google_compute_firewall" "www-rule" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80"]
+    ports    = ["80", "443"]
   }
 
   source_ranges = ["0.0.0.0/0"]
@@ -109,5 +121,21 @@ resource "google_compute_firewall" "k8s-rule" {
 #safe the external IP to a file -> https://stackoverflow.com/questions/63845957/terraform-saving-output-to-file
 resource "local_file" "external_ip" {
   content  = google_compute_instance.vm_instance.network_interface.0.access_config.0.nat_ip
-  filename = "tmp/ip.txt"
+  filename = "../tmp/ip.txt"
+}
+
+#time the local resource as it is depending on the remote to finish
+resource "null_resource" "local_setup" {
+  #https://www.terraform.io/docs/language/resources/provisioners/local-exec.html#command
+  provisioner "local-exec" {
+    #command = "echo ${self.private_ip} >> private_ips.txt"
+    # & multipline comments -> https://github.com/hashicorp/terraform/issues/3360#issuecomment-145393146
+    command = <<EOT
+      echo "local provisioning starting, now"
+      K8S_IP=${google_compute_instance.vm_instance.network_interface.0.access_config.0.nat_ip} \
+      HOST_USER=${var.gcp_ssh_user} \
+      provisioning/local/provision.sh
+    EOT
+  }
+  depends_on = [google_compute_instance.vm_instance]
 }

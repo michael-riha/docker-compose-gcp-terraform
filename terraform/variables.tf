@@ -27,9 +27,9 @@ variable "gcp_ssh_pub_key_file" {
 variable "gcp_ssh_priv_key_file" {
 }
 
-variable "ssh_keys" {
-  type = map(any)
-  default = {
-    "some" = "key"
-  }
+// now let's put digitalocean to the mix
+variable "do_acces_token" {
+}
+
+variable "do_maschine_type" {
 }

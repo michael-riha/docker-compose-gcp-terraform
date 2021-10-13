@@ -4,3 +4,4 @@ terraform/*terraform*
 terraform/*.out
 tmp/
 .DS_Store
+stripped-config

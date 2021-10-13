@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: external-container-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: external_container
+  template:
+    metadata:
+      labels:
+        app: external_container
+    spec:
+      containers:
+      - name: some-external-image
+        image: eu.gcr.io/moonlit-nature-284615/html2video:latest
+        ports:
+        - containerPort: 8080
+      imagePullSecrets:
+      - name: gcr-json-key
+      
